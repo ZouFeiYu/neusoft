@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
+	"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="org.gdpi.neusoft.dao.AuthorDao">
+	<resultMap type="org.gdpi.neusoft.bean.Author" id="authorMap">
+		<result column="creater_id" property="createdUser" />
+		<result column="creater_date" property="createdTime" />
+		<result column="modify_id" property="modifyUser" />
+		<result column="modify_date" property="modifyTime" />
+	</resultMap>
+</mapper>

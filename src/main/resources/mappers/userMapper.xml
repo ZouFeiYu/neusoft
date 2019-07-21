@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
+	"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="org.gdpi.neusoft.dao.UserDao">
+
+	<!-- public void insert(User user);//添加用户 -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id"
+		parameterType="org.gdpi.neusoft.bean.User">
+		insert into user(
+		nick_name, password, pass_tip,
+		pass_tip_key, name,
+		IDcard, email, phone, type, power, creater_id,
+		creater_date
+		)values(
+		#{nickName}, #{password}, #{passTip},
+		#{passTipKey}, #{name},
+		#{IdCard},#{email}, #{phone}, #{type},
+		#{power}, #{author.createdUser},
+		#{author.createdTime}
+		)
+	</insert>
+
+	<!-- public void delete(Integer id);//刪除用户,id -->
+	<delete id="delete" parameterType="Integer">
+		delete from user where
+		id=#{id}
+	</delete>
+
+	<!-- public List<User> selectAll(@Param("start")Integer start,@Param("count")Integer 
+		count);//查找用户,所有,分页 -->
+	<select id="selectAll" resultType="org.gdpi.neusoft.bean.User"
+		resultMap="userMap">
+		select *
+		from user
+		<if test="start != null and count != null">
+			limit
+			#{start},#{count}
+		</if>
+	</select>
+
+	<!-- public User selectById(Integer id);//查找用户,id -->
+	<select id="selectById" resultType="org.gdpi.neusoft.bean.User"
+		resultMap="userMap">
+		select *from user
+		where id=#{id}
+	</select>
+
+	<!-- public User selectByName(String nickName);// 通过用户名字查找 -->
+	<select id="selectByName"
+		resultType="org.gdpi.neusoft.bean.User" resultMap="userMap">
+		select * from user
+		where nick_name=#{nickName}
+	</select>
+
+	<!-- public List<User> selectByType(Integer type);//查找用户,类型 -->
+	<select id="selectByType" parameterType="Integer"
+		resultMap="userMap">
+		select *
+		from user
+		where type=#{type}
+		<if test="start != null and count != null">
+			limit
+			#{start},#{count}
+		</if>
+	</select>
+	<!-- public List<User> selectByTypeAndState( @Param("start")Integer start, 
+		@Param("count")Integer count, @Param("type")Integer type, @Param("state")List<Integer> 
+		state); -->
+	<select id="selectByTypeAndState" resultMap="userMap">
+		select *
+		from user
+		<where>
+			<if test="type!=null">
+				type in
+				<foreach collection="type" item="item" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="state!=null">
+				and state in
+				<foreach collection="state" item="item" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+		<if test="start != null and count != null">
+			limit
+			#{start},#{count}
+		</if>
+	</select>
+
+
+	<!-- public User selectByNameOrIDcard(String content);//查找用户,nickName或IDcard -->
+	<select id="selectByNameOrIDcard" parameterType="String"
+		resultMap="userMap">
+		select *
+		from user
+		where (nick_name=#{content} or
+		IDcard=#{content})
+	</select>
+
+	<!-- public void update(User user);//修改用户,id -->
+	<update id="update" parameterType="org.gdpi.neusoft.bean.User">
+		update
+		user
+		<set>
+			<if test="nickName!=null">
+				nick_name=#{nickName},
+			</if>
+			<if test="password!=null">
+				password=#{password},
+			</if>
+			<if test="passTip!=null">
+				pass_tip=#{passTip},
+			</if>
+			<if test="passTipKey!=null">
+				pass_tip_key=#{passTipKey},
+			</if>
+			<if test="name!=null">
+				name=#{name},
+			</if>
+			<if test="IdCard!=null">
+				IDcard=#{IdCard},
+			</if>
+			<if test="email!=null">
+				email=#{email},
+			</if>
+			<if test="phone!=null">
+				phone=#{phone},
+			</if>
+			<if test="type!=null">
+				type=#{type},
+			</if>
+			<if test="power!=null">
+				power=#{power},
+			</if>
+			<if test="state!=null">
+				state=#{state},
+			</if>
+			<if test="author!=null">
+				<if test="author.createdUser!=null">
+					creater_id=#{author.createdUser},
+				</if>
+				<if test="author.createdTime!=null">
+					creater_date=#{author.createdTime},
+				</if>
+				<if test="author.modifyUser!=null">
+					modify_id=#{author.modifyUser},
+				</if>
+				<if test="author.modifyTime!=null">
+					modify_date=#{author.modifyTime},
+				</if>
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!-- public void updateBatchState(List<Integer> ids,Integer state,Integer modifyUser,Date modifyTime) -->
+	<update id="updateBatchState" parameterType="java.util.List">
+		update
+		user set state=#{state},modify_id=#{modifyUser},modify_date=#{modifyTime} 
+		where id in
+		<foreach collection="ids" item="item" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+		
+	</update>
+
+	<!-- public Integer UserCount();// 查找用户总数 -->
+	<select id="UserCount" resultType="Integer">
+		select count(*) from user
+	</select>
+
+	<!-- public Integer TypeCount(Integer type);// 查找用户类型总数 -->
+	<select id="TypeCount" resultType="Integer"
+		parameterType="Integer">
+		select count(*) from user where type=#{type}
+	</select>
+	<!-- public Integer TypeAndStateCount(@Param("type")List<Integer> type,@Param("state")List<Integer> 
+		state); -->
+	<select id="TypeAndStateCount" resultType="Integer">
+		select count(*)
+		from user
+		<where>
+			<if test="type!=null">
+				type in
+				<foreach collection="type" item="item" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="state!=null">
+				and state in
+				<foreach collection="state" item="item" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<!-- public void deleteBatch(List<Integer> ids); -->
+	<delete id="deleteBatch" parameterType="java.util.List">
+		delete from user where
+		id in
+		<foreach collection="ids" item="item" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+	</delete>
+	<!-- user表映射 -->
+	<resultMap type="org.gdpi.neusoft.bean.User" id="userMap">
+		<id column="id" property="id" />
+		<result column="nick_name" property="nickName" />
+		<result column="password" property="password" />
+		<result column="pass_tip" property="passTip" />
+		<result column="pass_tip_key" property="passTipKey" />
+		<result column="name" property="name" />
+		<result column="IDcard" property="IdCard" />
+		<result column="email" property="email" />
+		<result column="phone" property="phone" />
+		<result column="type" property="type" />
+		<result column="power" property="power" />
+		<result column="state" property="state" />
+		<association property="author"
+			resultMap="org.gdpi.neusoft.dao.AuthorDao.authorMap" />
+	</resultMap>
+</mapper>

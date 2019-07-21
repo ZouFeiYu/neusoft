@@ -1,0 +1,14 @@
+eclipse.preferences.version=1
+encoding//src/main/webapp/WEB-INF/web/admin/_upload-img.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/web/admin/admin-pass-update.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/web/admin/error-none.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/web/admin/login.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/web/admin/product-add.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/web/before/agent_level.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/web/before/header.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/web/before/issues.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/web/before/item_category2.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/web/before/udai_modifypay_step2.jsp=UTF-8
+encoding//src/main/webapp/static/h-ui/css/H-ui.min.css=UTF-8
+encoding//src/test/java/org/gdpi/neusoft/test/dao/TestGoodsDao.java=UTF-8
+encoding/<project>=UTF-8

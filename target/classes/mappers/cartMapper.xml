@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
+	"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="org.gdpi.neusoft.dao.CartDao">
+	<!-- 添加商品 public void insert( @Param("goodsID")Integer goodsID, @Param("userID")Integer 
+		userID, @Param("count")Integer count); -->
+	<insert id="insert">
+		insert into cart
+		(user_id,goods_id,count)
+		values
+		<choose>
+			<when test="count==null">
+				(#{userID},#{goodsID},1)
+			</when>
+			<otherwise>
+				(#{userID},#{goodsID},#{count})
+			</otherwise>
+		</choose>
+		on duplicate key
+		update
+		<choose>
+			<when test="count==null">
+				count=count+1;
+			</when>
+			<otherwise>
+				count=count+#{count};
+			</otherwise>
+		</choose>
+	</insert>
+
+	<!-- 删除商品 public void delete( @Param("goodsID")Integer goodsID, @Param("userID") 
+		Integer userID); -->
+	<delete id="delete">
+		delete from cart
+		where
+		user_id = #{userID}
+		and
+		goods_id =
+		#{goodsID};
+	</delete>
+
+	<!-- 查找商品,分页 public List<Good> select( @Param("userID")Integer userID, @Param("start")Integer 
+		start, @Param("count")Integer count); -->
+	<select id="select" resultMap="org.gdpi.neusoft.dao.GoodsDao.goodMap">
+		select
+		goods.id, goods.category_id, goods.name, goods.details,
+		goods.image,cart.user_id userId,
+		goods.state, cart.count count, goods.price
+		from
+		goods,cart
+		where
+		cart.user_id = #{userID}
+		and
+		goods.id = cart.goods_id
+		<if test="start != null and count != null">
+			limit
+			#{start},#{count}
+		</if>
+	</select>
+	
+	<!-- 查找商品public List<Good> selectByUids( @Param("userID")Integer userID,
+	 @Param("ids") Integer[] ids); -->
+	<select id="selectByUids" resultMap="org.gdpi.neusoft.dao.GoodsDao.goodMap" >
+		select 
+			goods.id, goods.category_id, goods.name, goods.details,
+			goods.image,cart.user_id userId,
+			goods.state, cart.count count, goods.price
+		from goods join cart on
+			goods.id = cart.goods_id
+		where 
+			cart.user_id = #{userID} and
+			goods.id in 
+	        <foreach collection="ids" item="id" open="("   separator="," close=")">
+	            #{id}
+	        </foreach> 
+	</select>
+	<!-- 修改商品数量 public void update( @Param("userID")Integer userID, @Param("goodsID")Integer 
+		goodsID, @Param("count")Integer count); -->
+	<update id="update">
+		update cart set
+		count = #{count}
+		where
+		user_id = #{userID}
+		and
+		goods_id = #{goodsID}
+	</update>
+	
+	<!-- 查找商品总数 public Integer count( @Param("userID") Integer userID); -->
+	<select id="count" resultType="java.lang.Integer">
+		select count(*) from cart
+		where user_id=#{userID};
+	</select>
+	
+	<!-- 查找单个商品数量 public Integer selectByGoodsID(@Param("userID") Integer userID, @Param("goodsID") Integer goodsID); -->
+	<select id="selectByGoodsID" resultType="java.lang.Integer">
+		select count from cart
+		where 
+		user_id = #{userID}
+		and
+		goods_id = #{goodsID};
+	</select>
+	
+</mapper>

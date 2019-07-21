@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
+	"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="org.gdpi.neusoft.dao.GoodsDao">
+	<!-- public void insert(Good good);//添加商品 -->
+	<insert id="insert" parameterType="org.gdpi.neusoft.bean.Good">
+		insert into goods(
+			category_id,name,price,state,creater_id,creater_date
+		) values(
+			#{categoryId},#{name},#{price},#{state},#{author.createdUser},#{author.createdTime}
+		)
+	</insert>
+	
+	<!-- public void delete(Integer id);//删除商品,id -->
+	<delete id="delete">
+		delete from goods
+		where id=#{id}
+	</delete>
+	<!-- public List<Category> selectAll(@Param("start")Integer start,@Param("count")Integer count);//查找订单,所有,分页-->
+	
+	<!-- public List<Good> selectAll(@Param("start")Integer start,@Param("count")Integer count);//查找商品,所有,分页 -->
+	<select id="selectAll" resultMap="goodMap">
+		select * from goods 
+		<if test="start!=null and count!=null">		
+		limit #{start},#{count}
+		</if>
+	</select>
+	<!-- public Good selectById(Integer id);// 查找商品,id -->
+	<select id="selectById" resultMap="goodMap">
+		select * from goods
+		where id=#{id}
+	</select>
+	<!-- public List<Good> selectLike(@Param("content")String content,@Param("start")Integer start,@Param("count")Integer count);//查找商品,模糊搜索,分页 -->
+	<select id="selectLike" resultMap="goodMap">
+		select * from goods 
+		<where>
+			<if test="name != null and name != ''">
+				name like "%"#{name}"%"
+			</if>
+		</where>
+			limit #{start},#{count}
+	</select>
+	<!-- public List<Good> selectByCategoryId(Integer category,Integer start,Integer count);//查找商品,分类id -->
+	<select id="selectByCategoryId" resultMap="goodMap">
+		select * from goods
+		where category_id=#{categoryId} limit #{start},#{count}
+	</select>
+	<!-- public List<Good> selectByOrderId(String orderId);//查询上商品,订单号 -->
+	<select id="selectByOrderId" resultMap="goodMap" parameterType="String">
+		select goods.id id, goods.name name,order_details.count count,order_details.price price from goods,order_details
+		where goods.id=order_details.goods_id and order_details.order_id=#{orderId}
+			
+	</select>
+	<!-- public void update(Good good);//修改商品,id -->
+	<update id="update">
+		update goods set
+			category_id=#{categoryId},name=#{name},details=#{details},
+			price=#{price},vip_price=#{vipPrice},image=#{image},count=#{count},orders=#{orders},
+			state=#{state},modify_id=#{modifyUser},modify_date=#{modifyTime}
+		where id=#{id}
+	</update>
+	<!-- public Integer selectCount(String content);//模糊查询得商品的总量 -->
+	<select id="selectCount" resultType="java.lang.Integer">
+		select count(*) from goods
+		<where>
+			<if test="name != null and name != ''">
+				name like "%"#{name}"%"
+			</if>
+		</where>
+	</select>
+	
+	
+	<select id="selectByState" resultMap="goodMap">
+		select *
+		from goods
+		<where>
+			<if test="state!=null">
+				and state in
+				<foreach collection="state" item="item" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+		<if test="start != null and count != null">
+			limit
+			#{start},#{count}
+		</if>
+	</select>
+	
+	
+		<select id="stateCount" resultType="Integer">
+		select count(*)
+		from goods
+		<where>
+			<if test="state!=null">
+				and state in
+				<foreach collection="state" item="item" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	
+	<update id="updateBatchState" parameterType="java.util.List">
+		update
+		goods set state=#{state},modify_id=#{modifyUser},modify_date=#{modifyTime} 
+		where id in
+		<foreach collection="ids" item="item" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+		
+	</update>
+	
+	<delete id="deleteBatch" parameterType="java.util.List">
+		delete from goods where
+		id in
+		<foreach collection="ids" item="item" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+	</delete>
+	
+	<select id="selectByName" parameterType="String" resultMap="goodMap">
+	select *
+		from goods where name=#{name};
+	</select>
+	
+	<!-- user表映射 -->
+	<resultMap type="org.gdpi.neusoft.bean.Good" id="goodMap">
+		<id column="id" property="id"/>
+		<result column="category_id" property="categoryId"/>
+		<result column="name" property="name"/>
+		<result column="details" property="details"/>
+		<result column="price" property="price"/>
+		<result column="vip_price" property="vipPrice"/>
+		<result column="image" property="image"/>
+		<result column="count" property="count"/>
+		<result column="order" property="order"/>
+		<result column="state" property="state"/>
+		<association property="author" resultMap="org.gdpi.neusoft.dao.AuthorDao.authorMap"/>
+	</resultMap>
+</mapper>

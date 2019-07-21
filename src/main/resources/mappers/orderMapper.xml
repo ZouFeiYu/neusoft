@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
+	"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="org.gdpi.neusoft.dao.OrderDao">
+	<!-- public void insert(Order order);//添加订单 -->
+	<insert id="insert" parameterType="org.gdpi.neusoft.bean.Order">
+		insert into orders
+		(id,user_id,consignee,address,phone,state,creater_id,creater_date)
+		values
+		( #{id},#{userId},#{consignee},#{address},#{phone},#{state},#{author.createdUser},#{author.createdTime}); 
+		insert into order_details
+		(order_id,goods_id,count,price)
+		values 
+		<foreach separator="," item="good" collection="goods"> 
+			(#{id},#{good.id},#{good.count},#{good.price}) 
+		</foreach> ; 
+	</insert>
+	
+	<!-- public void delete(Integer id);//删除订单,id -->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from orders where id=#{id};
+		delete from order_details where order_id=#{id};
+	</delete>
+	
+	<!-- public List<Good> selectAll(@Param("start")Integer start,@Param("count")Integer count);//查找订单,所有,分页-->
+	<select id="selectAll" resultMap="orderMap">
+		select * from orders limit #{start},#{count};
+	</select>
+	
+	<!-- public List<Good> selectByUserId(@Param("userId")Integer userId,@Param("startDate")Date startDate,
+			@Param("stopDate")Date stopDate,@Param("orderId")String orderId,
+			@Param("start")Integer start,@Param("count")Integer count);//查找订单,用户id/时间段/订单号,分页 -->
+	<select id="selectByUserId" resultMap="orderMap">
+		select * from orders  
+		<where>
+			<if test="userId!=null">
+				 user_id=#{userId}
+			</if>
+			<if test="startDate!=null and stopDate!=null">
+				between #{startDate} and #{stopDate}
+			</if>
+		</where>
+	 	<if test="start!=null and count!=null">
+				  limit  #{start},#{count};
+		</if>
+	</select>
+	
+	<!-- public List<Order> selectByState(@Param("state")Integer state,@Param("start")Integer start,@Param("count")Integer count);// 查找订单,订单状态 -->
+	<select id="selectByState"  resultMap="orderMap">
+		select * from orders 
+		where state = #{state} limit #{start},#{count};
+	</select>
+	
+	<!-- public void update(Order order);//修改订单,id -->
+	<update id="update">
+		update orders 
+		<set>
+			<if test="order.userId!=null">
+				user_id=#{order.userId},
+			</if>
+			<if test="order.consignee!=null">
+				consignee=#{order.consignee},
+			</if>
+			<if test="order.address!=null">
+				address=#{order.address},
+			</if>
+			<if test="order.phone!=null">
+				phone=#{order.phone},
+			</if>
+			<if test="order.state!=null">
+				state=#{order.state},
+			</if>
+			<if test="order.author.modifyUser!=null">
+				modify_id=#{order.author.modifyUser},
+			</if>
+			<if test="order.author.modifyTime!=null">
+				modify_date=#{order.author.modifyTime},
+			</if>
+		</set>
+		where id=#{order.id};
+	</update>
+	<!-- //查询该用户所有订单 public List<Order> showAllByUserId(@Param("userId")Integer userId,@Param("start")Integer start,@Param("count")Integer count); -->
+	<select id="showAllByUserId" resultMap="orderMap">
+  		select*from orders where user_id=#{userId}
+	    limit #{start},#{count};
+	</select>
+	<!-- //查找用户订单总数 public Integer selectCountByUserId(@Param("userId")Integer userId); -->
+	<select id="selectCountByUserId" resultType="Integer">
+		select count(*) from orders where user_id=#{userId}; 
+	</select>
+	<!-- //通过订单id查找订单 public Order selectByOrderId(@Param("orderId")String  orderId) ; -->
+	<select id="selectByOrderId" resultMap="orderMap">
+		select * from orders  
+		where id=#{orderId}
+	  </select>
+	<!-- order表映射 -->
+	<resultMap type="org.gdpi.neusoft.bean.Order" id="orderMap">
+		<id column="id" property="id"/>
+		<result column="user_id" property="userId"/>
+		<result column="consignee" property="consignee"/>
+		<result column="address" property="address"/>
+		<result column="phone" property="phone"/>
+		<result column="state" property="state"/>
+		
+		<association property="author" resultMap="org.gdpi.neusoft.dao.AuthorDao.authorMap"/>
+	 <collection property="goods" select="org.gdpi.neusoft.dao.GoodsDao.selectByOrderId" column="id"> 
+		</collection> 
+	</resultMap>
+</mapper>

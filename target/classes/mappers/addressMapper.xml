@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
+	"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="org.gdpi.neusoft.dao.AddressDao">
+	<!--	public void insertAddress(Address address); //添加地址 -->
+	<insert id="insertAddress" parameterType="org.gdpi.neusoft.bean.Address"
+	keyProperty="id" useGeneratedKeys="true">
+		insert into address(
+			id,user_id,rec_name,province,city,area,town,detail,rec_address,phone,telphone,rec_default,
+			creater_id,creater_date,modify_id,modify_date	
+		)values(
+			#{id},#{userId},#{recName},#{province},#{city},#{area},#{town},#{detail},#{recAddress},#{phone},#{telphone},#{recDefault},
+			#{author.createdUser},#{author.createdTime},#{author.modifyUser},#{author.modifyTime}
+		);
+	</insert>
+	
+	<!-- //通过id删除地址public void deleteById(Integer id); -->
+	<delete id="deleteById">
+		delete from address where id=#{id}
+	</delete>
+	
+	<!-- //通过用户id删除 public void deleteByUserId(@Param("userId")Integer userId); -->
+	<delete id="deleteByUserId">
+		delete from address where user_id=#{userId}
+	</delete>
+	
+	<!-- //通过地址id查找 public void selectById(Integer id); -->
+	<select id="selectById" resultMap="AddressMap">
+		select 
+			id,user_id,rec_name,province,city,area,town,detail,rec_address,phone,telphone,rec_default,creater_id,creater_date,modify_id,modify_date
+		from address
+		where id=#{id}
+	</select>
+	<!--//查找用户默认地址 public Address selectDefaultAddress(@Param("userId") Integer userId);-->
+	<select id="selectDefaultAddress" resultMap="AddressMap">
+		select
+			 id,user_id,rec_name,province,city,area,town,detail,rec_address,phone,telphone,rec_default,creater_id,creater_date,modify_id,modify_date 
+		from address
+		where user_id=#{userId} and rec_default=1
+	</select>
+	<!-- //查找所有地址 public List<Address> selectAll(); -->
+	<select id="selectAll" resultMap="AddressMap">
+		select 
+			id,user_id,rec_name,province,city,area,town,detail,rec_address,phone,telphone,rec_default,creater_id,creater_date,modify_id,modify_date
+		 from address
+	</select>
+	
+	<!-- public List<Address> selectByUserId(@Param("userId")Integer userId);//通过用户id查找 -->
+	<select id="selectByUserId" resultMap="AddressMap">
+		select 
+			id,user_id,rec_name,province,city,area,town,detail,rec_address,phone,telphone,rec_default,creater_id,creater_date,modify_id,modify_date
+		from address
+		where user_id=#{userId}
+	</select>
+	
+	<!--	//查询地址总数 public Integer countAddress(); -->
+	<select id="countAddress" resultType="Integer">
+		select count(*) from address
+	</select>
+	<!-- public Integer countAddressByUserId(); //查询用户地址总数-->
+	<select id="countAddressByUserId" resultType="Integer">
+		select count(*) from address where user_id=${userId}
+	</select>
+	<!-- //更新地址	public void updateAddress(Address address) ; -->
+	<update id="updateAddress">
+		update address
+		<set>
+			<if test="recName!=null">
+				rec_name=#{recName},
+			</if>
+			<if test="province!=null">
+				province=#{province},
+			</if>
+			<if test="city!=null">
+				city=#{city},
+			</if>
+			<if test="area!=null">
+				area=#{area},
+			</if>
+			<if test="town!=null">
+				town=#{town},
+			</if>
+			<if test="detail!=null">
+				detail=#{detail},
+			</if>
+			<if test="recAddress!=null">
+				rec_address=#{recAddress},
+			</if>
+			<if test="phone!=null">
+				phone=#{phone},
+			</if>
+			<if test="telphone!=null">
+				telphone=#{telphone},
+			</if>
+			<if test="recDefault!=null">
+				rec_default=#{recDefault},
+			</if>
+			<if test="author.createdUser!=null">
+				creater_id=#{author.createdUser},
+			</if>
+			<if test="author.createdTime!=null">
+				creater_date=#{author.createdTime},
+			</if>
+			<if test="author.modifyUser!=null">
+				modify_id=#{author.modifyUser},
+			</if>
+			<if test="author.modifyTime!=null">
+				modify_date=#{author.modifyTime}	
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	<!-- //更新默认地址 ; public void updateRecDefault(@Param("oldDefault")Integer oldDefault,@Param("newDefault")Integer newDefault);-->
+	<update id="updateRecDefault">
+		update
+			address as a1,address as a2
+		set 
+			a1.rec_default =0,
+		    a2.rec_default=1
+		where 
+			a1.id=#{oldDefault}
+		    and
+		    a2.id=#{newDefault};
+	</update>
+	<!-- //取消旧默认地址 public void unDefaultAddress(@Param("userId")Integer userId);-->
+	<update id="unDefaultAddress">
+		update 
+			address
+		set
+			 rec_default=0
+		where
+			 user_id=#{userId}
+	</update>
+	<!-- address与author映射 -->
+	<resultMap type="org.gdpi.neusoft.bean.Address" id="AddressMap">
+		<id column="id" property="id"/>
+		<result column="user_id" property="userId"/>
+		<result column="province" property="province"/>
+		<result column="city" property="city"/>
+		<result column="area" property="area"/>
+		<result column="town" property="town"/>
+		<result column="detail" property="detail"/>
+		<result column="rec_name" property="recName"/>
+		<result column="rec_address" property="recAddress"/>
+		<result column="phone"  property="phone" />
+		<result column="telphone"  property="telphone" />
+		<result column="rec_default" property="recDefault"/>
+		<association property="author" resultMap="org.gdpi.neusoft.dao.AuthorDao.authorMap"/>
+	</resultMap>	
+</mapper>
